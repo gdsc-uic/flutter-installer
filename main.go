@@ -271,7 +271,7 @@ func main() {
 			continue
 		}
 
-		fmt.Printf(" already installed.\nDownloading installer for %s...\n", programName)
+		fmt.Printf(" not installed.\nDownloading installer for %s...\n", programName)
 		switch programName {
 		case "Git":
 			inst.downloadGit()
