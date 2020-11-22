@@ -16,6 +16,7 @@ import (
 	"github.com/cheggaaa/pb/v3"
 	"github.com/google/go-github/v32/github"
 	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/mem"
 )
@@ -38,7 +39,7 @@ type installer struct {
 }
 
 const (
-	version = "1.0"
+	version = "pre-1.0"
 )
 
 var (
@@ -186,6 +187,7 @@ func (i installer) downloadFlutter() {
 
 func main() {
 	sysInfo := strings.Builder{}
+	diskInfo := strings.Builder{}
 	wd, err := os.Getwd()
 	panicIfErr(err)
 	downloadFolder = path.Join(wd, "dsc-flutter-installer_downloads")
@@ -194,6 +196,7 @@ func main() {
 	}
 
 	systemInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "Green", TitlePos: "Top"})
+	diskInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "Blue", TitlePos: "Top"})
 	// Print system environment
 	// OS
 	// CPU Details
@@ -203,7 +206,7 @@ func main() {
 	cpuStats, _ := cpu.Info()
 	virtMemInfo, _ := mem.VirtualMemory()
 	ram := virtMemInfo.Total
-	// diskStat, _ := disk.Usage("/")
+	partitions, _ := disk.Partitions(false)
 
 	sysInfo.WriteString(fmt.Sprintf("%-8v%s %v\n", "OS:", hostStat.OS, hostStat.Platform))
 	sysInfo.WriteString(fmt.Sprintf("%-8v%v\n", "Arch:", hostStat.KernelArch))
@@ -225,6 +228,19 @@ func main() {
 
 	sysInfo.WriteString(fmt.Sprintf("%-8v%v", "RAM:", byteCountIEC(ram)))
 	systemInfoBox.Print("System Info", sysInfo.String())
+
+	// print disks
+	for i, part := range partitions {
+		if strings.HasPrefix(part.Mountpoint, "/boot") || strings.HasPrefix(part.Mountpoint, "/snap") {
+			continue
+		}
+		diskStat, _ := disk.Usage(part.Mountpoint)
+		_, _ = diskInfo.WriteString(fmt.Sprintf("%-25v %v/%v", part.Mountpoint, byteCountIEC(diskStat.Used), byteCountIEC(diskStat.Total)))
+		if i+2 < len(partitions) {
+			diskInfo.WriteString("\n")
+		}
+	}
+	diskInfoBox.Println("Disks", diskInfo.String())
 
 	inst := installer{
 		os:             hostStat.OS,
