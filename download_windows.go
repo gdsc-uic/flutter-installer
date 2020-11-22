@@ -7,11 +7,11 @@ import (
 )
 
 func init() {
-	prerequisites = map[string]string{
-		"Git":            "git",
-		"JDK":            "javac",
-		"Android Studio": "android-studio",
-		"Flutter":        "flutter",
+	prerequisites = [][]string{
+		{"Git", "git"},
+		{"JDK", "javac"},
+		{"Android Studio", "studio64"},
+		{"Flutter", "flutter"},
 	}
 }
 
@@ -30,7 +30,7 @@ func getGitWindowsLatestRelease(arch string) (string, string, error) {
 		}
 	}
 
-	return "", "", errors.New("no installer matched for this system")
+	return "", "", errors.New("no git installer matched for this system")
 }
 
 func (i installer) downloadGit() {

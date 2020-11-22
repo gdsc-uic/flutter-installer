@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -45,7 +46,7 @@ var (
 	ghClient       = github.NewClient(nil)
 	dlClient       = grab.NewClient()
 	// map[Program Name]program (e.g map[Git]git)
-	prerequisites = map[string]string{}
+	prerequisites = [][]string{}
 )
 
 // https://yourbasic.org/golang/formatting-byte-size-to-human-readable-format/
@@ -87,6 +88,7 @@ func programExists(name string) bool {
 func downloadFile(url string) {
 	fmt.Printf("Downloading %s\n", url)
 	req, _ := grab.NewRequest(downloadFolder, url)
+	req.Filename = filepath.Join(downloadFolder, filepath.Base(url))
 	resp := dlClient.Do(req)
 	t := time.NewTicker(200 * time.Millisecond)
 	downloadBar := pb.Full.Start64(resp.Size)
@@ -145,11 +147,41 @@ func (i installer) downloadJDK() {
 }
 
 func (i installer) downloadAndroidStudio() {
+	filename := ""
+	dlType := "install"
 
+	switch i.os {
+	case "windows":
+		filename = "android-studio-ide-201.6953283-windows.exe"
+	case "darwin":
+		filename = "android-studio-ide-201.6953283-macos.dmg"
+	case "linux":
+		filename = "android-studio-ide-201.6953283-linux.tar.gz"
+		dlType = "ide-zips"
+	default:
+		panic(fmt.Sprintf("os '%s' is not supported", i.os))
+	}
+
+	downloadFile(fmt.Sprintf("https://dl.google.com/edgedl/android/studio/%s/4.1.1.0/%s", dlType, filename))
 }
 
 func (i installer) downloadFlutter() {
+	filename := ""
+	os := i.os
 
+	switch i.os {
+	case "windows":
+		filename = "flutter_windows_1.22.4-stable.zip"
+	case "darwin":
+		os = "macos"
+		filename = "flutter_macos_1.22.4-stable.zip"
+	case "linux":
+		filename = "flutter_linux_1.22.4-stable.tar.xz"
+	default:
+		panic(fmt.Sprintf("os '%s' is not supported", i.os))
+	}
+
+	downloadFile(fmt.Sprintf("https://storage.googleapis.com/flutter_infra/releases/stable/%s/%s", os, filename))
 }
 
 func main() {
@@ -161,7 +193,7 @@ func main() {
 		os.Mkdir(downloadFolder, os.ModeAppend)
 	}
 
-	systemInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "Green", TitlePos: "Inside"})
+	systemInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "Green", TitlePos: "Top"})
 	// Print system environment
 	// OS
 	// CPU Details
@@ -200,8 +232,11 @@ func main() {
 		arch:           hostStat.KernelArch,
 	}
 
-	for programName, execName := range prerequisites {
+	for _, requi := range prerequisites {
+		programName, execName := requi[0], requi[1]
 		fmt.Printf("Checking %s...", programName)
+		time.Sleep(2 * time.Second)
+
 		if isProgramInstalled := programExists(execName); isProgramInstalled {
 			fmt.Println(" present")
 			continue

@@ -1,15 +1,19 @@
 package main
 
 func init() {
-	prerequisites = map[string]string{
-		"Homebrew": "brew",
-		"Git":      "git",
-		"JDK":      "javac",
-		// TODO:
-		"Android Studio": "android-studio",
-		"Flutter":        "flutter",
+	prerequisites = [][]string{
+		{"Homebrew", "brew"},
+		{"Git", "git"},
+		{"JDK", "javac"},
+		{"Android Studio", "android-studio"},
+		{"Flutter", "flutter"},
 	}
 }
 
-func (i installer) downloadHomebrew() {}
-func (i installer) downloadGit()      {}
+func (i installer) downloadHomebrew() {
+	execute("\"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)\"")
+}
+
+func (i installer) downloadGit() {
+	execute("brew install git")
+}
