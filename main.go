@@ -40,7 +40,7 @@ type installer struct {
 }
 
 const (
-	version = "pre-1.0"
+	version = "pre-1.0.test2"
 )
 
 var (
@@ -171,6 +171,7 @@ func (i installer) downloadFlutter() {
 	filename := ""
 	os := i.os
 
+	// TODO: setup flutter
 	switch i.os {
 	case "windows":
 		filename = "flutter_windows_1.22.4-stable.zip"
@@ -289,6 +290,6 @@ func main() {
 	}
 	time.Sleep(2 * time.Second)
 
-	fmt.Println("Download has finished! Please press ENTER to exit...")
+	fmt.Println("Download has finished! Press ENTER to exit...")
 	reader.ReadBytes('\n')
 }
