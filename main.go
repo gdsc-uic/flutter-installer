@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"os"
@@ -91,7 +92,7 @@ func downloadFile(url string) {
 	req, _ := grab.NewRequest(downloadFolder, url)
 	req.Filename = filepath.Join(downloadFolder, filepath.Base(url))
 	resp := dlClient.Do(req)
-	t := time.NewTicker(200 * time.Millisecond)
+	t := time.NewTicker(100 * time.Millisecond)
 	downloadBar := pb.Full.Start64(resp.Size)
 	downloadBar.Set(pb.SIBytesPrefix, true)
 	downloadBar.Set(pb.Bytes, true)
@@ -195,8 +196,10 @@ func main() {
 		os.Mkdir(downloadFolder, os.ModeAppend)
 	}
 
+	reader := bufio.NewReader(os.Stdin)
+	warningBox := box.New(box.Config{Px: 2, Py: 0, Type: "Double", ContentAlign: "Center", Color: "Yellow", TitlePos: "Inside"})
 	systemInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "Green", TitlePos: "Top"})
-	diskInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "Blue", TitlePos: "Top"})
+	diskInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "HiBlue", TitlePos: "Top"})
 	// Print system environment
 	// OS
 	// CPU Details
@@ -221,13 +224,15 @@ func main() {
 		}
 	}
 
-	sysInfo.WriteString(fmt.Sprintf("%-8v", "CPU:"))
-	for cpuName, cpuCores := range cpus {
-		sysInfo.WriteString(fmt.Sprintf("%20v\n", fmt.Sprintf("%s x %v", cpuName, cpuCores)))
+	if len(cpus) > 0 {
+		sysInfo.WriteString(fmt.Sprintf("%-8v", "CPU:"))
+		for cpuName, cpuCores := range cpus {
+			sysInfo.WriteString(fmt.Sprintf("%20v\n", fmt.Sprintf("%s x %v", cpuName, cpuCores)))
+		}
 	}
 
 	sysInfo.WriteString(fmt.Sprintf("%-8v%v", "RAM:", byteCountIEC(ram)))
-	systemInfoBox.Print("System Info", sysInfo.String())
+	systemInfoBox.Println("System Info", sysInfo.String())
 
 	// print disks
 	for i, part := range partitions {
@@ -242,6 +247,13 @@ func main() {
 	}
 	diskInfoBox.Println("Disks", diskInfo.String())
 
+	warningBox.Println("WARNING!", fmt.Sprintf("Your downloads will be placed at:\n%s\n\nIf you wish to put the downloads into another directory,\nplease move the installer to its desired destination and run it again.", downloadFolder))
+	fmt.Print("Would you like to proceed? (Y/N): ")
+	choice, _ := reader.ReadByte()
+	if choice != 'y' && choice != 'Y' {
+		os.Exit(1)
+	}
+
 	inst := installer{
 		os:             hostStat.OS,
 		platformFamily: hostStat.Platform,
@@ -254,11 +266,11 @@ func main() {
 		time.Sleep(2 * time.Second)
 
 		if isProgramInstalled := programExists(execName); isProgramInstalled {
-			fmt.Println(" present")
+			fmt.Println(" already installed.")
 			continue
 		}
 
-		fmt.Printf(" not present.\nDownloading installer for %s...\n", programName)
+		fmt.Printf(" already installed.\nDownloading installer for %s...\n", programName)
 		switch programName {
 		case "Git":
 			inst.downloadGit()
@@ -275,4 +287,8 @@ func main() {
 			inst.downloadHomebrew()
 		}
 	}
+	time.Sleep(2 * time.Second)
+
+	fmt.Println("Download has finished! Please press ENTER to exit...")
+	reader.ReadBytes('\n')
 }
