@@ -1,5 +1,3 @@
-// +build windows
-
 package main
 
 import (
@@ -35,7 +33,7 @@ func getGitWindowsLatestRelease(arch string) (string, string, error) {
 	return "", "", errors.New("no installer matched for this system")
 }
 
-func (i installer) downloadAndInstallGit() {
+func (i installer) downloadGit() {
 	_, installerURL, err := getGitWindowsLatestRelease(i.arch)
 	panicIfErr(err)
 	downloadFile(installerURL)

@@ -1,5 +1,3 @@
-// +build darwin
-
 package main
 
 func init() {
@@ -14,3 +12,4 @@ func init() {
 }
 
 func (i installer) downloadHomebrew() {}
+func (i installer) downloadGit()      {}

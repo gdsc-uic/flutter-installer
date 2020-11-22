@@ -144,10 +144,6 @@ func (i installer) downloadJDK() {
 	downloadFile(installerURL)
 }
 
-func (i installer) downloadHomebrew() {
-	panic("error: only for macos users only.")
-}
-
 func (i installer) downloadAndroidStudio() {
 
 }

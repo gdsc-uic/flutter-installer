@@ -1,0 +1,23 @@
+#!/bin/bash
+
+for OS in linux darwin windows
+do
+    for ARCH in 386 amd64
+    do
+        export GOOS=$OS
+        export GOARCH=$ARCH
+        export FILENAME="dsc-flutter-installer-$GOOS-$GOARCH"
+
+        # Building 32-bit executables in MacOS is not allowed anymore
+        if [[ $OS = "darwin" && $ARCH = "386" ]]; then
+            continue
+        fi
+
+        if [ $OS = "windows" ]; then
+            FILENAME="$FILENAME.exe"
+        fi
+
+        echo go build -o bin/$FILENAME .
+        go build -o bin/$FILENAME .
+    done
+done
