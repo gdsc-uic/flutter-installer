@@ -40,7 +40,7 @@ type installer struct {
 }
 
 const (
-	version = "pre-1.0.test2"
+	version = "pre-1.0.test3"
 )
 
 var (
