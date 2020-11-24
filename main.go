@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -40,7 +40,7 @@ type installer struct {
 }
 
 const (
-	version = "pre-1.0.test3"
+	version = "pre-1.0.test4"
 )
 
 var (
@@ -113,13 +113,29 @@ Loop:
 		panic(fmt.Sprintf("Download failed: %v\n", err))
 	}
 
-	fmt.Printf("Download complete.\n")
+	fmt.Printf("Download for \"%s\" was complete.\n", filepath.Base(url))
 }
 
-func (i installer) downloadJDK() {
-	installerURL := ""
+func (i installer) downloadAndroidStudio() {
+	dlType := "install"
+	ext := "exe"
+	os := i.os
 
-	fmt.Println(" not present.\nDownloading installer for JDK...")
+	switch i.os {
+	case "darwin":
+		os = "macos"
+		ext = "dmg"
+	case "linux":
+		ext = "tar.gz"
+		dlType = "ide-zips"
+	}
+
+	filename := fmt.Sprintf("android-studio-ide-201.6953283-%s.%s", os, ext)
+	downloadFile(fmt.Sprintf("https://dl.google.com/edgedl/android/studio/%s/4.1.1.0/%s", dlType, filename))
+}
+
+func (i installer) downloadJDKFromMirror() {
+	installerURL := ""
 	// TODO:
 	rel, _, err := ghClient.Repositories.GetReleaseByTag(context.Background(), "AdoptOpenJDK", "openjdk15-binaries", "jdk-15.0.1+9")
 	panicIfErr(err)
@@ -141,63 +157,35 @@ func (i installer) downloadJDK() {
 		}
 	}
 
-	if len(installerURL) == 0 {
-		fmt.Println("jdk installer not found")
+	if len(installerURL) > 0 {
+		downloadFile(installerURL)
 	}
 
-	downloadFile(installerURL)
-}
-
-func (i installer) downloadAndroidStudio() {
-	filename := ""
-	dlType := "install"
-
-	switch i.os {
-	case "windows":
-		filename = "android-studio-ide-201.6953283-windows.exe"
-	case "darwin":
-		filename = "android-studio-ide-201.6953283-macos.dmg"
-	case "linux":
-		filename = "android-studio-ide-201.6953283-linux.tar.gz"
-		dlType = "ide-zips"
-	default:
-		panic(fmt.Sprintf("os '%s' is not supported", i.os))
-	}
-
-	downloadFile(fmt.Sprintf("https://dl.google.com/edgedl/android/studio/%s/4.1.1.0/%s", dlType, filename))
+	panic(fmt.Sprintf("jdk installer not found for \"%s\"", i.os))
 }
 
 func (i installer) downloadFlutter() {
-	filename := ""
 	os := i.os
-
-	// TODO: setup flutter
-	switch i.os {
-	case "windows":
-		filename = "flutter_windows_1.22.4-stable.zip"
-	case "darwin":
+	ext := "zip"
+	if os == "darwin" {
 		os = "macos"
-		filename = "flutter_macos_1.22.4-stable.zip"
-	case "linux":
-		filename = "flutter_linux_1.22.4-stable.tar.xz"
-	default:
-		panic(fmt.Sprintf("os '%s' is not supported", i.os))
+	} else if os == "linux" {
+		ext = "tar.xz"
 	}
 
+	filename := fmt.Sprintf("flutter_%s_1.22.4-stable.%s", os, ext)
 	downloadFile(fmt.Sprintf("https://storage.googleapis.com/flutter_infra/releases/stable/%s/%s", os, filename))
 }
 
 func main() {
-	sysInfo := strings.Builder{}
-	diskInfo := strings.Builder{}
+	sysInfo, diskInfo := strings.Builder{}, strings.Builder{}
 	wd, err := os.Getwd()
 	panicIfErr(err)
-	downloadFolder = path.Join(wd, "dsc-flutter-installer_downloads")
+	downloadFolder = filepath.Join(wd, "dsc-flutter-installer_downloads")
 	if _, err := os.Stat(downloadFolder); os.IsNotExist(err) {
 		os.Mkdir(downloadFolder, os.ModeAppend)
 	}
 
-	reader := bufio.NewReader(os.Stdin)
 	warningBox := box.New(box.Config{Px: 2, Py: 0, Type: "Double", ContentAlign: "Center", Color: "Yellow", TitlePos: "Inside"})
 	systemInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "Green", TitlePos: "Top"})
 	diskInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "HiBlue", TitlePos: "Top"})
@@ -241,17 +229,17 @@ func main() {
 			continue
 		}
 		diskStat, _ := disk.Usage(part.Mountpoint)
-		_, _ = diskInfo.WriteString(fmt.Sprintf("%-25v %v/%v", part.Mountpoint, byteCountIEC(diskStat.Used), byteCountIEC(diskStat.Total)))
+		diskInfo.WriteString(fmt.Sprintf("%-25v %v/%v (%.2f%% used)", part.Mountpoint, byteCountIEC(diskStat.Used), byteCountIEC(diskStat.Total), diskStat.UsedPercent))
 		if i+2 < len(partitions) {
 			diskInfo.WriteString("\n")
 		}
 	}
 	diskInfoBox.Println("Disks", diskInfo.String())
-
 	warningBox.Println("WARNING!", fmt.Sprintf("Your downloads will be placed at:\n%s\n\nIf you wish to put the downloads into another directory,\nplease move the installer to its desired destination and run it again.", downloadFolder))
 	fmt.Print("Would you like to proceed? (Y/N): ")
-	choice, _ := reader.ReadByte()
-	if choice != 'y' && choice != 'Y' {
+	var choice string
+	_, _ = fmt.Scanln(&choice)
+	if strings.ToLower(choice) != "y" {
 		os.Exit(1)
 	}
 
@@ -263,9 +251,23 @@ func main() {
 
 	for _, requi := range prerequisites {
 		programName, execName := requi[0], requi[1]
+		if programName == "Android Studio" && runtime.GOOS == "windows" {
+			var decision string
+			fmt.Print("Do you have Android Studio installed? (Y/N): ")
+			_, _ = fmt.Scanln(&decision)
+			if strings.ToLower(decision) == "y" {
+				var customStudioFolder string
+
+				fmt.Print("Enter Android Studio installation folder (leave blank if using default folder): ")
+				_, err = fmt.Scanln(&customStudioFolder)
+				if err == nil {
+					execName = filepath.Join(customStudioFolder, "bin", "studio64.exe")
+				}
+			}
+		}
+
 		fmt.Printf("Checking %s...", programName)
 		time.Sleep(2 * time.Second)
-
 		if isProgramInstalled := programExists(execName); isProgramInstalled {
 			fmt.Println(" already installed.")
 			continue
@@ -291,5 +293,5 @@ func main() {
 	time.Sleep(2 * time.Second)
 
 	fmt.Println("Download has finished! Press ENTER to exit...")
-	reader.ReadBytes('\n')
+	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }

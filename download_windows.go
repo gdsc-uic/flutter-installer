@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"strings"
 )
 
@@ -10,7 +11,7 @@ func init() {
 	prerequisites = [][]string{
 		{"Git", "git"},
 		{"JDK", "javac"},
-		{"Android Studio", "studio64"},
+		{"Android Studio", filepath.Join("C:\\", "Program Files", "Android", "Android Studio", "bin", "studio64.exe")},
 		{"Flutter", "flutter"},
 	}
 }
@@ -37,4 +38,8 @@ func (i installer) downloadGit() {
 	_, installerURL, err := getGitWindowsLatestRelease(i.arch)
 	panicIfErr(err)
 	downloadFile(installerURL)
+}
+
+func (i installer) downloadJDK() {
+	i.downloadJDKFromMirror()
 }

@@ -5,7 +5,7 @@ func init() {
 		{"Homebrew", "brew"},
 		{"Git", "git"},
 		{"JDK", "javac"},
-		{"Android Studio", "android-studio"},
+		{"Android Studio", "/Applications/Android\\ Studio.app"},
 		{"Flutter", "flutter"},
 	}
 }
@@ -16,4 +16,10 @@ func (i installer) downloadHomebrew() {
 
 func (i installer) downloadGit() {
 	execute("brew install git")
+}
+
+func (i installer) downloadJDK() {
+	// tap adoptopenjdk
+	execute("brew tap AdoptOpenJDK/openjdk")
+	execute("brew cask install adoptopenjdk15")
 }

@@ -40,3 +40,17 @@ func (i installer) downloadGit() {
 	fmt.Printf("Executing %s...\n", strings.Join(args, " "))
 	execute(strings.Join(args, " "))
 }
+
+func (i installer) downloadJDK() {
+	args := []string{"sudo"}
+
+	if i.platformFamily == "ubuntu" || i.platformFamily == "debian" {
+		args = append(args, "apt-get", "-y", "install", "openjdk-13-jdk")
+		fmt.Printf("Executing %s...\n", strings.Join(args, " "))
+		execute(strings.Join(args, " "))
+		return
+	}
+
+	i.downloadJDKFromMirror()
+	// panic(fmt.Sprintf("no java installer matched for \"%s\"", i.platformFamily))
+}
