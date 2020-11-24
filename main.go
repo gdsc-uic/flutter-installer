@@ -40,7 +40,7 @@ type installer struct {
 }
 
 const (
-	version = "pre-1.0.test4"
+	version = "pre-1.0.test4-1"
 )
 
 var (
@@ -183,7 +183,7 @@ func main() {
 	panicIfErr(err)
 	downloadFolder = filepath.Join(wd, "dsc-flutter-installer_downloads")
 	if _, err := os.Stat(downloadFolder); os.IsNotExist(err) {
-		os.Mkdir(downloadFolder, os.ModeAppend)
+		os.Mkdir(downloadFolder, 0777)
 	}
 
 	warningBox := box.New(box.Config{Px: 2, Py: 0, Type: "Double", ContentAlign: "Center", Color: "Yellow", TitlePos: "Inside"})
