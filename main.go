@@ -235,7 +235,6 @@ func main() {
 	ram := virtMemInfo.Total
 	partitions, _ := disk.Partitions(false)
 
-	printDscLogo()
 	sysInfo.WriteString(fmt.Sprintf("%-8v%s %v\n", "OS:", hostStat.OS, hostStat.Platform))
 	sysInfo.WriteString(fmt.Sprintf("%-8v%v\n", "Arch:", hostStat.KernelArch))
 
