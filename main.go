@@ -40,7 +40,7 @@ type installer struct {
 }
 
 const (
-	version = "pre-1.0.test4-1"
+	version = "1.0"
 )
 
 var (
@@ -224,7 +224,6 @@ func main() {
 
 	warningBox := box.New(box.Config{Px: 2, Py: 0, Type: "Double", ContentAlign: "Center", Color: "Yellow", TitlePos: "Inside"})
 	systemInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "Green", TitlePos: "Top"})
-	diskInfoBox := box.New(box.Config{Px: 2, Py: 0, Type: "Single", ContentAlign: "Left", Color: "HiBlue", TitlePos: "Top"})
 	// Print system environment
 	// OS
 	// CPU Details
@@ -236,6 +235,7 @@ func main() {
 	ram := virtMemInfo.Total
 	partitions, _ := disk.Partitions(false)
 
+	printDscLogo()
 	sysInfo.WriteString(fmt.Sprintf("%-8v%s %v\n", "OS:", hostStat.OS, hostStat.Platform))
 	sysInfo.WriteString(fmt.Sprintf("%-8v%v\n", "Arch:", hostStat.KernelArch))
 
@@ -257,20 +257,21 @@ func main() {
 	}
 
 	sysInfo.WriteString(fmt.Sprintf("%-8v%v", "RAM:", byteCountIEC(ram)))
-	systemInfoBox.Println("System Info", sysInfo.String())
-
+	diskInfo.WriteString("Disks:\n")
 	// print disks
 	for i, part := range partitions {
 		if strings.HasPrefix(part.Mountpoint, "/boot") || strings.HasPrefix(part.Mountpoint, "/snap") {
 			continue
 		}
 		diskStat, _ := disk.Usage(part.Mountpoint)
-		diskInfo.WriteString(fmt.Sprintf("%-25v %v/%v (%.2f%% used)", part.Mountpoint, byteCountIEC(diskStat.Used), byteCountIEC(diskStat.Total), diskStat.UsedPercent))
+		diskInfo.WriteString(fmt.Sprintf("        %-25v %v/%v (%.2f%% used)", part.Mountpoint, byteCountIEC(diskStat.Used), byteCountIEC(diskStat.Total), diskStat.UsedPercent))
 		if i+2 < len(partitions) {
 			diskInfo.WriteString("\n")
 		}
 	}
-	diskInfoBox.Println("Disks", diskInfo.String())
+
+	sysInfo.WriteString("\n" + diskInfo.String())
+	systemInfoBox.Println("System Info", sysInfo.String())
 	warningBox.Println("WARNING!", fmt.Sprintf("Your downloads will be placed at:\n%s\n\nIf you wish to put the downloads into another directory,\nplease move the installer to its desired destination and run it again.", downloadFolder))
 	fmt.Print("Would you like to proceed? (Y/N): ")
 	var choice string
