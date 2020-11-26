@@ -11,6 +11,7 @@ func init() {
 	prerequisites = [][]string{
 		{"Git", "git"},
 		{"JDK", "javac"},
+		{"Visual Studio Code", "code"},
 		{"Android Studio", filepath.Join("C:\\", "Program Files", "Android", "Android Studio", "bin", "studio64.exe")},
 		{"Flutter", "flutter"},
 	}

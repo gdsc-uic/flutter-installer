@@ -164,6 +164,41 @@ func (i installer) downloadJDKFromMirror() {
 	panic(fmt.Sprintf("jdk installer not found for \"%s\"", i.os))
 }
 
+func (i installer) downloadVscode() {
+	systemName := i.os
+
+	if i.os == "windows" {
+		systemName = "win32"
+
+		switch i.arch {
+		case "x86_64":
+			systemName += "-x64"
+		case "arm":
+			systemName += "-arm64"
+		}
+
+		systemName += "-user"
+	} else if i.os == "linux" {
+		if i.platformFamily == "ubuntu" || i.platformFamily == "debian" {
+			systemName += "-deb"
+		} else {
+			systemName += "-rpm"
+		}
+
+		switch i.arch {
+		case "arm":
+			systemName += "armhf"
+		case "arm64":
+			systemName += "arm64"
+		default:
+			systemName += "x64"
+		}
+	}
+
+	downloadLink := fmt.Sprintf("https://update.code.visualstudio.com/latest/%s/stable", systemName)
+	downloadFile(downloadLink)
+}
+
 func (i installer) downloadFlutter() {
 	os := i.os
 	ext := "zip"
@@ -174,7 +209,8 @@ func (i installer) downloadFlutter() {
 	}
 
 	filename := fmt.Sprintf("flutter_%s_1.22.4-stable.%s", os, ext)
-	downloadFile(fmt.Sprintf("https://storage.googleapis.com/flutter_infra/releases/stable/%s/%s", os, filename))
+	downloadLink := fmt.Sprintf("https://storage.googleapis.com/flutter_infra/releases/stable/%s/%s", os, filename)
+	downloadFile(downloadLink)
 }
 
 func main() {
@@ -283,10 +319,9 @@ func main() {
 			inst.downloadAndroidStudio()
 		case "Flutter":
 			inst.downloadFlutter()
-		default:
-			if inst.os != "darwin" && programName != "Homebrew" {
-				continue
-			}
+		case "Visual Studio Code":
+			inst.downloadVscode()
+		case "Homebrew":
 			inst.downloadHomebrew()
 		}
 	}

@@ -9,6 +9,7 @@ func init() {
 	prerequisites = [][]string{
 		{"Git", "git"},
 		{"JDK", "javac"},
+		{"Visual Studio Code", "code"},
 		{"Android Studio", "android-studio"},
 		{"Flutter", "flutter"},
 	}

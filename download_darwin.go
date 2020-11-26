@@ -5,6 +5,7 @@ func init() {
 		{"Homebrew", "brew"},
 		{"Git", "git"},
 		{"JDK", "javac"},
+		{"Visual Studio Code", "code"},
 		{"Android Studio", "/Applications/Android\\ Studio.app"},
 		{"Flutter", "flutter"},
 	}
