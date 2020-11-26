@@ -24,7 +24,3 @@ func execute(shcmd string) {
 
 	fmt.Println(stdBuffer.String())
 }
-
-// func launchTerminal() {
-
-// }

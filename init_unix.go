@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	if (runtime.GOOS == "linux" || runtime.GOOS == "darwin") && !isatty.IsTerminal(os.Stderr.Fd()) {
+	if !isatty.IsTerminal(os.Stderr.Fd()) {
 		execPath, _ := os.Executable()
 
 		// TODO: debian-based distros only. not sure to other distros
