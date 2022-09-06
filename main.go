@@ -130,8 +130,9 @@ func (i installer) downloadAndroidStudio() {
 		dlType = "ide-zips"
 	}
 
-	filename := fmt.Sprintf("android-studio-ide-201.6953283-%s.%s", os, ext)
-	downloadFile(fmt.Sprintf("https://dl.google.com/edgedl/android/studio/%s/4.1.1.0/%s", dlType, filename))
+	androidStudioVersion := "2021.2.1.16"
+	filename := fmt.Sprintf("android-studio-ide-%s-%s.%s", androidStudioVersion, os, ext)
+	downloadFile(fmt.Sprintf("https://dl.google.com/edgedl/android/studio/%s/%s/%s", androidStudioVersion, dlType, filename))
 }
 
 func (i installer) downloadJDKFromMirror() {
@@ -208,8 +209,8 @@ func (i installer) downloadFlutter() {
 		ext = "tar.xz"
 	}
 
-	filename := fmt.Sprintf("flutter_%s_1.22.4-stable.%s", os, ext)
-	downloadLink := fmt.Sprintf("https://storage.googleapis.com/flutter_infra/releases/stable/%s/%s", os, filename)
+	filename := fmt.Sprintf("flutter_%s_3.3.0-stable.%s", os, ext)
+	downloadLink := fmt.Sprintf("https://storage.googleapis.com/flutter_infra_release/releases/stable/%s/%s", os, filename)
 	downloadFile(downloadLink)
 }
 
