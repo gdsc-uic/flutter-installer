@@ -40,7 +40,8 @@ type installer struct {
 }
 
 const (
-	version = "1.0.1"
+	version        = "1.0.1"
+	flutterVersion = "3.3.10"
 )
 
 var (
@@ -209,7 +210,7 @@ func (i installer) downloadFlutter() {
 		ext = "tar.xz"
 	}
 
-	filename := fmt.Sprintf("flutter_%s_3.3.0-stable.%s", os, ext)
+	filename := fmt.Sprintf("flutter_%s_%s-stable.%s", os, flutterVersion, ext)
 	downloadLink := fmt.Sprintf("https://storage.googleapis.com/flutter_infra_release/releases/stable/%s/%s", os, filename)
 	downloadFile(downloadLink)
 }
