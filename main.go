@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/Delta456/box-cli-maker/v2"
-	"github.com/cavaliercoder/grab"
+	"github.com/cavaliergopher/grab/v3"
 	"github.com/cheggaaa/pb/v3"
 	"github.com/google/go-github/v32/github"
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -93,7 +93,7 @@ func downloadFile(url string) {
 	req.Filename = filepath.Join(downloadFolder, filepath.Base(url))
 	resp := dlClient.Do(req)
 	t := time.NewTicker(100 * time.Millisecond)
-	downloadBar := pb.Full.Start64(resp.Size)
+	downloadBar := pb.Full.Start64(resp.Size())
 	downloadBar.Set(pb.SIBytesPrefix, true)
 	downloadBar.Set(pb.Bytes, true)
 	defer t.Stop()
