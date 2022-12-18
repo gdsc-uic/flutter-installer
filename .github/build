@@ -1,23 +1,39 @@
 #!/bin/bash
 
-for OS in linux darwin windows
+for ARCH in x86 arm64
 do
-    export GOOS=$OS
-    export GOARCH="386"
-    export FILENAME="dsc-flutter-installer"
+    for OS in linux macos windows
+    do
+        export GOOS=$OS
+        export GOARCH=$ARCH
+        export ARCHLABEL=$ARCH
 
-    # Building 32-bit executables in MacOS is not allowed anymore
-    if [ $OS = "darwin" ]; then
-        GOARCH="amd64"
-        FILENAME="$FILENAME-macos"
-    else
-        FILENAME="$FILENAME-$GOOS"
-    fi
+        if [ $ARCH = "x86" ]; then
+            GOARCH="386"
+        fi
 
-    if [ $OS = "windows" ]; then
-        FILENAME="$FILENAME.exe"
-    fi
+        # Building 32-bit executables in MacOS is not allowed anymore
+        if [ $OS = "macos" ]; then
+            if [ $ARCH = "x86" ]; then
+                GOARCH="amd64"
+                ARCHLABEL="x86_64"
+            fi
 
-    echo go build -o bin/$FILENAME .
-    go build -o bin/$FILENAME .
+            # Label arm64 as apple_silicon in MacOS for easy recognition
+            if [ $ARCH = "arm64" ]; then
+                ARCHLABEL="apple_silicon"
+            fi
+
+            GOOS="darwin"
+        fi
+
+        export FILENAME="flutter-installer_$OS-$ARCHLABEL"
+
+        if [ $OS = "windows" ]; then
+            FILENAME="$FILENAME.exe"
+        fi
+
+        echo go build -o bin/$FILENAME .
+        go build -o bin/$FILENAME .
+    done
 done
