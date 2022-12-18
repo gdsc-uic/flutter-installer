@@ -268,6 +268,25 @@ func main() {
 		arch:           hostStat.KernelArch,
 	}
 
+	if inst.os == "darwin" && inst.arch == "arm64" {
+		fmt.Println("NOTE: You are running an Apple Silicon machine. To develop apps on Flutter, you are required to install Rosetta.")
+		fmt.Print("Checking Rosetta...")
+
+		// if os is macos and arch is arm64, check if rosetta exists
+		// if it's not, install it
+		rosettaCheckCmd := exec.Command("/usr/bin/pgrep", "-q", "oah")
+		if err := rosettaCheckCmd.Run(); err != nil {
+			panicIfErr(err)
+		}
+
+		if rosettaCheckCmd.ProcessState.ExitCode() != 0 {
+			fmt.Println(" not installed. Installing Rosetta...")
+			execute("sudo softwareupdate --install-rosetta --agree-to-license")
+		} else {
+			fmt.Println(" already installed.")
+		}
+	}
+
 	for _, requi := range prerequisites {
 		programName, execName := requi[0], requi[1]
 		if programName == "Android Studio" && runtime.GOOS == "windows" {
