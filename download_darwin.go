@@ -24,3 +24,7 @@ func (i installer) downloadJDK() {
 	execute("brew tap AdoptOpenJDK/openjdk")
 	execute("brew cask install adoptopenjdk15")
 }
+
+func (i installer) downloadAndroidStudio() {
+	execute("brew install android-studio")
+}

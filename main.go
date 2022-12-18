@@ -117,25 +117,6 @@ Loop:
 	fmt.Printf("Download for \"%s\" was complete.\n", filepath.Base(url))
 }
 
-func (i installer) downloadAndroidStudio() {
-	dlType := "install"
-	ext := "exe"
-	os := i.os
-
-	switch i.os {
-	case "darwin":
-		os = "macos"
-		ext = "dmg"
-	case "linux":
-		ext = "tar.gz"
-		dlType = "ide-zips"
-	}
-
-	androidStudioVersion := "2021.2.1.16"
-	filename := fmt.Sprintf("android-studio-ide-%s-%s.%s", androidStudioVersion, os, ext)
-	downloadFile(fmt.Sprintf("https://dl.google.com/edgedl/android/studio/%s/%s/%s", androidStudioVersion, dlType, filename))
-}
-
 func (i installer) downloadJDKFromMirror() {
 	installerURL := ""
 	// TODO:
