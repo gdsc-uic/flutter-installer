@@ -3,6 +3,8 @@
 
 package main
 
+import "fmt"
+
 func (i installer) downloadHomebrew() {
 	panic("error: only for macos users only.")
 }
