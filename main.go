@@ -40,7 +40,7 @@ type installer struct {
 }
 
 const (
-	version        = "1.1.1"
+	version        = "1.1.2"
 	flutterVersion = "3.3.10"
 )
 
